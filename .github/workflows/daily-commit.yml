@@ -1,35 +1,37 @@
 name: Daily Commit by 21f1005321@ds.study.iitm.ac.in
 
 on:
-  # Run at 10:30 UTC every day → 16:00 IST
   schedule:
-    - cron:  "30 10 * * *"
-  workflow_dispatch:     # allow manual trigger
+    # 10:30 UTC == 16:00 IST
+    - cron: "30 10 * * *"
+  workflow_dispatch:
 
 jobs:
   daily-commit:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔎 Checkout repository
+      - name: 🔎 Checkout repository (with write token)
         uses: actions/checkout@v3
+        with:
+          # ensure the GITHUB_TOKEN is configured for subsequent pushes
+          persist-credentials: true
 
-      - name: ⏱️ Update last run timestamp
+      - name: 🕒 Update last run timestamp
         run: |
-          # ensure the folder exists
           mkdir -p .github/daily
-          # write the current UTC time in ISO format
           date -u +"%Y-%m-%dT%H:%M:%SZ" > .github/daily/last_run.txt
 
-      - name: 🔧 Commit changes (21f1005321@ds.study.iitm.ac.in)
+      - name: 🛠️ Commit changes (21f1005321@ds.study.iitm.ac.in)
         run: |
-          # configure git user
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # stage the timestamp file
+          git config user.name "21f1005321@ds.study.iitm.ac.in"
+          git config user.email "21f1005321@ds.study.iitm.ac.in"
           git add .github/daily/last_run.txt
-          # allow an empty commit if nothing actually changed
           git commit --allow-empty -m "chore: update last_run at $(cat .github/daily/last_run.txt)"
 
       - name: 🚀 Push to remote
-        run: git push
+        env:
+          # GITHUB_TOKEN is automatically provided by Actions
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push origin HEAD:main
