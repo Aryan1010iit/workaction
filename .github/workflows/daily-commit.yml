@@ -1,32 +1,31 @@
 name: Daily Commit by 21f1005321@ds.study.iitm.ac.in
 
+# Runs every day at 10:30 UTC = 16:00 IST
 on:
   schedule:
-    # 16:00 India Standard Time is 10:30 UTC
     - cron: '30 10 * * *'
   workflow_dispatch:
 
 jobs:
   daily-commit:
     runs-on: ubuntu-latest
+
     steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: 📝 Update timestamp file
+      - name: Create or update timestamp file
         run: |
-          # make sure the folder exists
-          mkdir -p .github/daily
-          # write the current ISO timestamp into last_run.txt
-          date -u +"%Y-%m-%dT%H:%M:%SZ" > .github/daily/last_run.txt
+          # append current UTC timestamp to timestamp.txt
+          echo "Last run: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> timestamp.txt
 
-      - name: 🔧 Commit changes (21f1005321@ds.study.iitm.ac.in)
+      - name: Commit changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .github/daily/last_run.txt
-          git commit -m "chore: update last_run at $(cat .github/daily/last_run.txt)" || echo "No changes to commit"
+          git config user.name "21f1005321@ds.study.iitm.ac.in"
+          git config user.email "21f1005321@ds.study.iitm.ac.in"
+          git add timestamp.txt
+          # only commit if there are changes
+          git diff --staged --quiet || git commit -m "chore: daily commit by 21f1005321@ds.study.iitm.ac.in"
 
-      - name: 🚀 Push to main
-        run: |
-          git push origin HEAD:main
+      - name: Push changes
+        run: git push
