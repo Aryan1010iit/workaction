@@ -1,31 +1,35 @@
 name: Daily Commit by 21f1005321@ds.study.iitm.ac.in
 
-# Runs every day at 10:30 UTC = 16:00 IST
 on:
+  # Run at 10:30 UTC every day → 16:00 IST
   schedule:
-    - cron: '30 10 * * *'
-  workflow_dispatch:
+    - cron:  "30 10 * * *"
+  workflow_dispatch:     # allow manual trigger
 
 jobs:
   daily-commit:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: 🔎 Checkout repository
         uses: actions/checkout@v3
 
-      - name: Create or update timestamp file
+      - name: ⏱️ Update last run timestamp
         run: |
-          # append current UTC timestamp to timestamp.txt
-          echo "Last run: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> timestamp.txt
+          # ensure the folder exists
+          mkdir -p .github/daily
+          # write the current UTC time in ISO format
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > .github/daily/last_run.txt
 
-      - name: Commit changes
+      - name: 🔧 Commit changes (21f1005321@ds.study.iitm.ac.in)
         run: |
-          git config user.name "21f1005321@ds.study.iitm.ac.in"
-          git config user.email "21f1005321@ds.study.iitm.ac.in"
-          git add timestamp.txt
-          # only commit if there are changes
-          git diff --staged --quiet || git commit -m "chore: daily commit by 21f1005321@ds.study.iitm.ac.in"
+          # configure git user
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # stage the timestamp file
+          git add .github/daily/last_run.txt
+          # allow an empty commit if nothing actually changed
+          git commit --allow-empty -m "chore: update last_run at $(cat .github/daily/last_run.txt)"
 
-      - name: Push changes
+      - name: 🚀 Push to remote
         run: git push
