@@ -1,37 +1,39 @@
+# .github/workflows/daily-commit.yml
 name: Daily Commit by 21f1005321@ds.study.iitm.ac.in
 
+# Run daily at 16:00 IST → 10:30 UTC
 on:
   schedule:
-    # 10:30 UTC == 16:00 IST
-    - cron: "30 10 * * *"
+    - cron: '30 10 * * *'
   workflow_dispatch:
+
+# Grant write perms to the GITHUB_TOKEN
+permissions:
+  contents: write
 
 jobs:
   daily-commit:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔎 Checkout repository (with write token)
+      - name: 🔍 Checkout repository
         uses: actions/checkout@v3
         with:
-          # ensure the GITHUB_TOKEN is configured for subsequent pushes
-          persist-credentials: true
+          fetch-depth: 0             # need full history to push
+          persist-credentials: true  # use the GITHUB_TOKEN for any git push
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🕒 Update last run timestamp
+      - name: ⏱ Update last run timestamp
         run: |
-          mkdir -p .github/daily
-          date -u +"%Y-%m-%dT%H:%M:%SZ" > .github/daily/last_run.txt
+          echo "Last run: $(date --utc +'%Y-%m-%dT%H:%M:%SZ')" > LAST_RUN.txt
 
-      - name: 🛠️ Commit changes (21f1005321@ds.study.iitm.ac.in)
+      - name: 🔧 Commit changes (21f1005321@ds.study.iitm.ac.in)
         run: |
-          git config user.name "21f1005321@ds.study.iitm.ac.in"
+          git config user.name  "21f1005321@ds.study.iitm.ac.in"
           git config user.email "21f1005321@ds.study.iitm.ac.in"
-          git add .github/daily/last_run.txt
-          git commit --allow-empty -m "chore: update last_run at $(cat .github/daily/last_run.txt)"
+          git add LAST_RUN.txt
+          git commit -m "ci: update last run timestamp" || echo "No changes to commit"
 
       - name: 🚀 Push to remote
-        env:
-          # GITHUB_TOKEN is automatically provided by Actions
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git push origin HEAD:main
+          git push
