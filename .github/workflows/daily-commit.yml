@@ -1,0 +1,29 @@
+name: Daily Commit by 21f1005321@ds.study.iitm.ac.in
+
+on:
+  schedule:
+    # Runs every day at 10:30 UTC → 16:00 IST
+    - cron: "30 10 * * *"
+  workflow_dispatch:
+
+jobs:
+  daily-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create timestamp file by 21f1005321@ds.study.iitm.ac.in
+        run: |
+          echo "Last run: $(date --utc +'%Y-%m-%dT%H:%M:%SZ')" > last-run.txt
+
+      - name: Commit changes by 21f1005321@ds.study.iitm.ac.in
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "21f1005321@ds.study.iitm.ac.in"
+          git add last-run.txt
+          git commit -m "chore: daily timestamp update [skip ci]" || echo "No changes to commit"
+
+      - name: Push commit
+        run: git push
